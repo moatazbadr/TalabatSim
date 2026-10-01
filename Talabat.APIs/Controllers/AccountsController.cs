@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Google.Apis.Auth;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -21,12 +22,14 @@ public class AccountsController : ControllerBase
     private readonly ILogger<AccountsController> _Logger;
     private readonly IMapper _mapper;
     private readonly SignInManager<AppUser> _signInManager; //FOR LOGIN ==> the user tries to login with his email and password, we need to check if the password is correct or not, so we will use SignInManager 
-    public AccountsController(UserManager<AppUser> userManager, ITokenService tokenService, SignInManager<AppUser> signInManager, ILogger<AccountsController> logger, IMapper imapper)
+   private readonly IConfiguration _config; 
+    public AccountsController(UserManager<AppUser> userManager, ITokenService tokenService, SignInManager<AppUser> signInManager, ILogger<AccountsController> logger, IMapper imapper, IConfiguration config)
     {
         _userManager = userManager;
         _tokenService = tokenService;
         _signInManager = signInManager;
         _Logger = logger;
+        _config = config;
         _mapper = imapper;
     }
 
@@ -73,6 +76,62 @@ public class AccountsController : ControllerBase
             token = await _tokenService.CreateToken(user, _userManager)
         };
     }
+
+    #region Google Login
+    [HttpPost("google-login")]
+    public async Task<ActionResult<UserDto>> GoogleLogin([FromBody] GoogleAuthDto googleAuthDto)
+    {
+        GoogleJsonWebSignature.Payload payload;
+
+        try
+        {
+            var settings = new GoogleJsonWebSignature.ValidationSettings
+            {
+                Audience = new[] { _config["GoogleAuth:ClientId"] }
+            };
+
+            // Validates token signature, audience, and expiration against Google servers
+            payload = await GoogleJsonWebSignature.ValidateAsync(googleAuthDto.IdToken, settings);
+        }
+        catch (InvalidJwtException ex)
+        {
+            _Logger.LogError(ex, "Invalid Google token provided.");
+            return Unauthorized(new ApiResponse(401, "Invalid Google Token"));
+        }
+
+        // Check if user already exists
+        var user = await _userManager.FindByEmailAsync(payload.Email);
+
+        if (user == null)
+        {
+            // Register user if logging in for the first time via Google
+            user = new AppUser
+            {
+                DisplayName = payload.Name ?? payload.Email.Split("@")[0],
+                Email = payload.Email,
+                UserName = payload.Email.Split("@")[0],
+                EmailConfirmed = true
+            };
+
+            var identityResult = await _userManager.CreateAsync(user);
+
+            if (!identityResult.Succeeded)
+            {
+                return BadRequest(new ApiResponse(400, "Failed to create user from Google account"));
+            }
+        }
+
+        // Return user info along with your application's JWT token
+        return Ok(new UserDto
+        {
+            DisplayName = user.DisplayName,
+            Email = user.Email,
+            token = await _tokenService.CreateToken(user, _userManager)
+        });
+    }
+
+
+    #endregion
 
 
 

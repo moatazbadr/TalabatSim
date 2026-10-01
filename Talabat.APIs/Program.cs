@@ -47,6 +47,14 @@ public class Program
 
 
         builder.Services.AddIdentityServices(builder.Configuration);
+        builder.Services.AddCors(options =>
+        {
+            options.AddPolicy("CorsPolicy", policy =>
+            {
+                policy.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin();
+            });
+        });
+        // Inside app pipeline:
 
 
         #endregion
@@ -98,6 +106,7 @@ public class Program
 
         #region Configure - Configure the HTTP request pipeline
 
+        app.UseCors("CorsPolicy");
         app.UseStaticFiles();
         app.UseHttpsRedirection();
         app.UseAuthentication();

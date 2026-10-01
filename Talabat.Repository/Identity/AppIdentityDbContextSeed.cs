@@ -13,8 +13,8 @@ public static class AppIdentityDbContextSeed
             {
                 Id = "19271e61-94ae-46b6-8a0e-cbe292887107", //id 
                 DisplayName = "Moataz badr mohamed",
-                Email = "zezobadr988@gmail.com",
-                NormalizedEmail= "zezobadr988@gmail.com".ToUpper(),
+                Email = "zezobadr88@gmail.com",
+                NormalizedEmail= "zezobadr88@gmail.com".ToUpper(),
                 UserName = "Moataz.Badr",
                 NormalizedUserName = "Moataz.Badr".ToUpper(),
                 PhoneNumber="01097160693",
