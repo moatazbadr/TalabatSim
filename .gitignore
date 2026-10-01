@@ -1,0 +1,33 @@
+## Visual Studio cache & user-specific files
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vscode/
+
+## Build outputs & compiled binaries
+[Bb]in/
+[Oo]bj/
+[Dd]ebug/
+[Rr]elease/
+*.dll
+*.exe
+*.pdb
+
+## Package caches & restore artifacts
+packages/
+*.nuget.props
+*.nuget.targets
+project.lock.json
+project.fragment.lock.json
+
+## Logs & test results
+*.log
+TestResults/
+
+## Sensitive settings & local secrets
+appsettings.json
+appsettings.Development.json
+appsettings.*.json
+!appsettings.Example.json

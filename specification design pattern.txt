@@ -1,0 +1,19 @@
+specification design pattern
+
+
+//specification design pattern will help us make this query work while using the generic repository
+_dbContext.products.where(p=>p.id==id).include(p=>p.productType).include(p=>p.productBrand); 
+
+//we can divide this query into the following parts :
+
+1-Entry point ==> _dbContext.products     //first part of the query and calling the DbSet
+
+2-where condition ==> where(p=>p.id==id)  //filtering the products 
+
+3-List of Includes ==> include(p=>p.productType).include(p=>p.productBrand) //there might be two includes or more or less
+
+
+How it works :
+
+interface ==> signature of property for each component of the query (3 parts)
+class ==> will implement the interface with the properties
